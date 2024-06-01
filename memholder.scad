@@ -1,12 +1,13 @@
 // Memory Module Holder for 3D Printing
-// memholder v2.0 - January 7, 2023
-// CrazyblocksTechnologies Computer Laboratories 2022-2023
+// memholder v2.1 - June 1, 2024
+// CTCL 2022-2024
 // -- LICENSE --
 // To the extent possible under law, the author(s) have dedicated all copyright and related and neighboring rights to this software to the public domain worldwide. 
 // This software is distributed without any warranty. You should have received a copy of the CC0 Public Domain Dedication along with this software. 
 // If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 // == START CONFIGURATION SECTION ==
+// All units are in mm unless otherwise specified
 
 // -- Module parameters --
 
@@ -31,11 +32,13 @@ mem_pcb_width = mem_preset_defs[mem_preset][2];
 
 // -- Base parameters --
 
-// Width for walls on side of memory module - unit: mm
+// Width for walls on side of memory module
 base_side_width = 4; // [1:0.2:6]
-// Extra width of walls on the sides - unit: mm
+// Extra width for base under walls
+base_side_ext = 2; // [0:0.2:6]
+// Extra width of walls on the sides
 base_side_width_ext = 3; // [1:0.2:6] 
-// Height of walls for memory modules  - unit: mm
+// Height of walls for memory modules
 base_side_height = 9; // [5:1:50]
 // Base height - unit: mm
 base_height = 1; // [1:0.1:3]
@@ -61,11 +64,15 @@ post_tolerance = 1.5;
 
 post_ext_wall_height = 10;
 
+// == END CONFIGURATION SECTION ==
+// == START CALCULATION SECTION ==
+
 // calculate from above to know how far to move the holder
 post_total_len = post_size_len + (post_ext_wall * 2);
 post_total_wid = post_size_wid + (post_ext_wall * 2);
 
-// == END CONFIGURATION SECTION ==
+// == END CALCULATION SECTION ==
+// == START DRAWING SECTION
 
 // Draw brace
 // Module length side
@@ -88,6 +95,7 @@ translate([base_length_brace_width, post_total_len, 0]) {
         }
     }
 
+    // Do not draw braces if the unit holds less than five modules
     if (mem_count > 5) {
         for (a = [0 : 1 : floor(mem_count / 8) + 1]) {
             translate([(((mem_width_total * mem_count) - mem_width_total) / (floor(mem_count / 6) + 1)) * a, 0, 0]) {
@@ -97,10 +105,10 @@ translate([base_length_brace_width, post_total_len, 0]) {
     }
 
     // Module width side
-    cube([mem_width_total * mem_count, base_side_width + base_side_width_ext ,base_height]);
+    cube([mem_width_total * mem_count, base_side_width + base_side_width_ext + base_side_ext, base_height]);
 
-    translate([0, mem_pcb_length, 0]) {
-        cube([mem_width_total * mem_count, base_side_width + base_side_width_ext ,base_height]);
+    translate([0, mem_pcb_length - base_side_ext, 0]) {
+        cube([mem_width_total * mem_count, base_side_width + base_side_width_ext + base_side_ext, base_height]);
     }
 
     // Walls
@@ -164,7 +172,8 @@ if (post_enable) {
         translate([post_ext_wall + (post_tolerance / 2), post_ext_wall + (post_tolerance / 2), post_ext_wall_height]) {
             cube([post_size_len - post_tolerance, post_size_wid - post_tolerance, post_ext_height + (post_base_height - post_ext_wall_height)]);
         }
-    
+        
+        
         translate([((mem_width_total * mem_count) + base_length_brace_width) - (post_total_wid - base_length_brace_width),0,0]) {
             difference() {
                 cube([post_total_len, post_total_wid, post_ext_wall_height]);
@@ -178,3 +187,5 @@ if (post_enable) {
        }   
     }
 }
+
+// == END DRAWING SECTION ==
